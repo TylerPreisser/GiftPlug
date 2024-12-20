@@ -1,135 +1,91 @@
-const express = require('express');
-const cors = require('cors');
-const { Configuration, OpenAIApi } = require('openai');
-const axios = require('axios');
-const aws4 = require('aws4');
-
-// These will come from environment variables on Render.
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const AMAZON_ACCESS_KEY = process.env.AMAZON_ACCESS_KEY;
-const AMAZON_SECRET_KEY = process.env.AMAZON_SECRET_KEY;
-const AMAZON_PARTNER_TAG = process.env.AMAZON_PARTNER_TAG; 
-const AMAZON_HOST = 'webservices.amazon.com'; 
-const AMAZON_REGION = 'us-east-1';
+const express = require("express");
+const axios = require("axios");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
+const port = 3000;
+
+// Middleware
 app.use(express.json());
+app.use(express.static("public"));
 
-const configuration = new Configuration({ apiKey: OPENAI_API_KEY });
-const openai = new OpenAIApi(configuration);
+// OpenAI API Key
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-async function searchAmazonProducts(keywords, priceRange) {
-  const params = {
-    PartnerTag: AMAZON_PARTNER_TAG,
-    PartnerType: 'Associates',
-    Marketplace: 'www.amazon.com',
-    Keywords: keywords,
-    ItemPage: 1,
-    SortBy: 'Featured',
-    MinPrice: priceRange.min * 100,
-    MaxPrice: priceRange.max * 100,
-    Resources: [
-      'Images.Primary.Medium',
-      'ItemInfo.Title',
-      'Offers.Listings.Price'
-    ]
-  };
+// Your Amazon PartnerTag
+const AMAZON_PARTNER_TAG = "your-partner-tag";
 
-  const path = '/paapi5/searchitems';
-  const request = {
-    host: AMAZON_HOST,
-    path: path,
-    service: 'execute-api',
-    region: AMAZON_REGION,
-    method: 'POST',
-    url: `https://${AMAZON_HOST}${path}`,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Amz-Target': 'com.amazon.paapi5.v1.SearchItems',
-      'X-Amz-Content-Sha256': 'required'
-    },
-    data: JSON.stringify(params)
-  };
+// Sample Product Database (Replace with dynamic queries if needed)
+const productDatabase = [
+  {
+    keywords: ["cooking", "under50", "christmas"],
+    title: "Non-Stick Baking Set",
+    url: `https://www.amazon.com/example-product1?tag=${AMAZON_PARTNER_TAG}`,
+    image: "https://via.placeholder.com/200?text=Baking+Set",
+  },
+  {
+    keywords: ["fitness", "50-100", "birthday"],
+    title: "Wireless Fitness Tracker",
+    url: `https://www.amazon.com/example-product2?tag=${AMAZON_PARTNER_TAG}`,
+    image: "https://via.placeholder.com/200?text=Fitness+Tracker",
+  },
+];
 
-  const opts = aws4.sign(request, {
-    accessKeyId: AMAZON_ACCESS_KEY,
-    secretAccessKey: AMAZON_SECRET_KEY
-  });
-
-  delete opts.headers.Host;
-  delete opts.headers['Content-Length'];
-
-  const response = await axios(opts);
-  if (response.data.SearchResult && response.data.SearchResult.Items) {
-    return response.data.SearchResult.Items;
-  } else {
-    return [];
-  }
+// Helper Function: Match Keywords
+function matchProducts(keywords) {
+  return productDatabase.filter((product) =>
+    keywords.some((keyword) => product.keywords.includes(keyword.toLowerCase()))
+  );
 }
 
-app.post('/api/recommend', async (req, res) => {
-  const { occasion, budget, interest, notes } = req.body;
+// Route: Analyze Questionnaire & Generate Recommendations
+app.post("/api/recommend", async (req, res) => {
+  const userInput = req.body;
 
-  let priceRange = { min: 0, max: 5000 };
-  if (budget === 'under50') {
-    priceRange = { min: 0, max: 50 };
-  } else if (budget === '50-100') {
-    priceRange = { min: 50, max: 100 };
-  } else if (budget === '100plus') {
-    priceRange = { min: 100, max: 1000 };
-  }
-
+  // Compose prompt for OpenAI
   const prompt = `
-  The user wants gift recommendations for a ${occasion}.
-  Budget: ${budget}
-  Interest: ${interest}
-  Additional notes: ${notes}
-
-  Provide 3 keyword sets in JSON:
-  {
-    "keywords": ["kw1", "kw2", "kw3"]
-  }
+    Analyze the following user input and recommend product categories or keywords:
+    Occasion: ${userInput.occasion}
+    Budget: ${userInput.budget}
+    Interest: ${userInput.interest}
+    Notes: ${userInput.notes || "No additional notes provided."}
+    
+    Output 3-5 recommended product keywords for gifts.
   `;
 
   try {
-    const aiResponse = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: prompt,
-      max_tokens: 150,
-      temperature: 0.7
-    });
+    // Call OpenAI API
+    const response = await axios.post(
+      "https://api.openai.com/v1/completions",
+      {
+        model: "text-davinci-003",
+        prompt,
+        max_tokens: 50,
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
 
-    const text = aiResponse.data.choices[0].text.trim();
-    let keywordsArray = [];
-    try {
-      const parsed = JSON.parse(text);
-      keywordsArray = parsed.keywords || [];
-    } catch (err) {
-      keywordsArray = [text];
-    }
+    const aiKeywords = response.data.choices[0].text
+      .trim()
+      .split(",")
+      .map((keyword) => keyword.trim());
 
-    let products = [];
-    for (const kw of keywordsArray) {
-      const items = await searchAmazonProducts(kw, priceRange);
-      products = products.concat(items);
-      if (products.length >= 6) break;
-    }
+    // Match products using AI-generated keywords
+    const recommendations = matchProducts(aiKeywords);
 
-    const recommendations = products.slice(0, 6).map(item => ({
-      title: item.ItemInfo?.Title?.DisplayValue || "No Title",
-      image: item.Images?.Primary?.Medium?.URL || "",
-      link: item.DetailPageURL
-    }));
-
-    res.json({ recommendations });
+    res.json(recommendations);
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: 'An error occurred processing your request.' });
+    console.error("Error calling OpenAI API:", error.message);
+    res.status(500).json({ error: "Failed to generate recommendations." });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
+// Start the Server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
