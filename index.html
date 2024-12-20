@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gift Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Find the Perfect Gift</h1>
+    <form>
+      <label for="hobby">What's her hobby?</label>
+      <select id="hobby">
+        <option value="cooking">Cooking</option>
+        <option value="fitness">Fitness</option>
+        <option value="tech">Tech Gadgets</option>
+      </select>
+
+      <label for="budget">What's your budget?</label>
+      <select id="budget">
+        <option value="under50">Under $50</option>
+        <option value="50to100">$50 to $100</option>
+        <option value="100plus">Over $100</option>
+      </select>
+
+      <button type="button">Find Gifts</button>
+    </form>
+  </div>
+</body>
+</html>
