@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wife Depot</title>
+    <!-- Link to External CSS (make sure style.css is in the same folder as index.html) -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header fade-in">
+        <h1>We Know Guys Hate Shopping</h1>
+        <p>And trust us, AI is better at shopping than you are.</p>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-container fade-in">
+        <h2>Find the Perfect Gift</h2>
+        <form id="giftForm">
+            <label for="occasion">Occasion</label>
+            <select id="occasion">
+                <option value="christmas">Christmas</option>
+                <option value="anniversary">Anniversary</option>
+                <option value="birthday">Birthday</option>
+            </select>
+
+            <label for="budget">Budget</label>
+            <select id="budget">
+                <option value="under50">Under $50</option>
+                <option value="50-100">$50 - $100</option>
+                <option value="100plus">$100+</option>
+            </select>
+
+            <label for="interest">Her Interests</label>
+            <select id="interest">
+                <option value="cooking">Cooking</option>
+                <option value="fitness">Fitness</option>
+                <option value="tech">Tech Gadgets</option>
+            </select>
+
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" placeholder="Tell us something special about her..."></textarea>
+
+            <button type="button" class="submit-btn" onclick="handleFormSubmit()">Find the Perfect Gift</button>
+        </form>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer">
+        <p>&copy; 2024 Wife Depot. All Rights Reserved.</p>
+    </div>
+
+    <script>
+        // Form submission handler
+        function handleFormSubmit() {
+            const occasion = document.getElementById('occasion').value;
+            const budget = document.getElementById('budget').value;
+            const interest = document.getElementById('interest').value;
+            const notes = document.getElementById('notes').value;
+
+            alert(`Form Submitted:\nOccasion: ${occasion}\nBudget: ${budget}\nInterest: ${interest}\nNotes: ${notes}`);
+        }
+    </script>
+</body>
+</html>
