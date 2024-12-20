@@ -1,61 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gift Finder</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wife Depot</title>
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Find the Perfect Gift</h1>
-    <form>
-      <label for="hobby">What's her hobby?</label>
-      <select id="hobby">
-        <option value="cooking">Cooking</option>
-        <option value="fitness">Fitness</option>
-        <option value="tech">Tech Gadgets</option>
-      </select>
+    <!-- Header Section -->
+    <div class="header fade-in">
+        <h1>We Know Guys Hate Shopping</h1>
+        <p>And trust us, AI is better at shopping than you are.</p>
+    </div>
 
-      <label for="budget">What's your budget?</label>
-      <select id="budget">
-        <option value="under50">Under $50</option>
-        <option value="50to100">$50 to $100</option>
-        <option value="100plus">Over $100</option>
-      </select>
+    <!-- Form Section -->
+    <div class="form-container fade-in" style="animation-delay: 0.5s;">
+        <h2>Find the Perfect Gift</h2>
+        <form id="giftForm">
+            <label for="occasion">Occasion</label>
+            <select id="occasion">
+                <option value="christmas">Christmas</option>
+                <option value="anniversary">Anniversary</option>
+                <option value="birthday">Birthday</option>
+            </select>
 
-      <button type="button">Find Gifts</button>
-    </form>
-  </div>
+            <label for="budget">Budget</label>
+            <select id="budget">
+                <option value="under50">Under $50</option>
+                <option value="50-100">$50 - $100</option>
+                <option value="100plus">$100+</option>
+            </select>
+
+            <label for="interest">Her Interests</label>
+            <select id="interest">
+                <option value="cooking">Cooking</option>
+                <option value="fitness">Fitness</option>
+                <option value="tech">Tech Gadgets</option>
+            </select>
+
+            <label for="notes">Additional Notes</label>
+            <textarea id="notes" placeholder="Tell us something special about her..."></textarea>
+
+            <button type="button" class="submit-btn" onclick="handleFormSubmit()">Find the Perfect Gift</button>
+        </form>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer">
+        <p>&copy; 2024 Wife Depot. All Rights Reserved.</p>
+    </div>
+
+    <script>
+        // Form submission handler
+        function handleFormSubmit() {
+            const occasion = document.getElementById('occasion').value;
+            const budget = document.getElementById('budget').value;
+            const interest = document.getElementById('interest').value;
+            const notes = document.getElementById('notes').value;
+
+            alert(`Form Submitted:\\nOccasion: ${occasion}\\nBudget: ${budget}\\nInterest: ${interest}\\nNotes: ${notes}`);
+            // Add advanced AI backend integration here.
+        }
+
+        // Add fade-in animations to elements
+        document.querySelectorAll('.fade-in').forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.2}s`;
+        });
+    </script>
 </body>
 </html>
