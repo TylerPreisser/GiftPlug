@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Wife Depot</title>
-    <!-- Link to External CSS (make sure style.css is in the same folder as index.html) -->
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-    <!-- Header Section -->
     <div class="header fade-in">
         <h1>We Know Guys Hate Shopping</h1>
         <p>And trust us, AI is better at shopping than you are.</p>
     </div>
 
-    <!-- Form Section -->
     <div class="form-container fade-in">
         <h2>Find the Perfect Gift</h2>
         <form id="giftForm">
@@ -46,20 +43,78 @@
         </form>
     </div>
 
-    <!-- Footer Section -->
     <div class="footer">
         <p>&copy; 2024 Wife Depot. All Rights Reserved.</p>
     </div>
 
+    <div id="recommendations" class="fade-in"></div>
+
     <script>
-        // Form submission handler
-        function handleFormSubmit() {
+        // Replace the URL below with your actual backend URL once deployed on Render
+        const backendUrl = 'https://YOUR-BACKEND-URL.onrender.com/api/recommend';
+
+        async function handleFormSubmit() {
             const occasion = document.getElementById('occasion').value;
             const budget = document.getElementById('budget').value;
             const interest = document.getElementById('interest').value;
             const notes = document.getElementById('notes').value;
 
-            alert(`Form Submitted:\nOccasion: ${occasion}\nBudget: ${budget}\nInterest: ${interest}\nNotes: ${notes}`);
+            try {
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ occasion, budget, interest, notes })
+                });
+
+                const data = await response.json();
+                displayRecommendations(data.recommendations);
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
+                document.getElementById('recommendations').innerHTML = '<p>Sorry, something went wrong. Please try again later.</p>';
+            }
+        }
+
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('recommendations');
+            container.innerHTML = '<h2>Recommended Gifts</h2>';
+            const grid = document.createElement('div');
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+            grid.style.gap = '20px';
+
+            recommendations.forEach(item => {
+                const card = document.createElement('div');
+                card.style.border = '1px solid #ddd';
+                card.style.padding = '10px';
+                card.style.textAlign = 'center';
+
+                const img = document.createElement('img');
+                img.src = item.image;
+                img.alt = item.title;
+                img.style.width = '100%';
+
+                const title = document.createElement('h3');
+                title.textContent = item.title;
+
+                const link = document.createElement('a');
+                link.href = item.link;
+                link.target = '_blank';
+                link.textContent = 'View on Amazon';
+                link.style.display = 'inline-block';
+                link.style.marginTop = '10px';
+                link.style.padding = '5px 10px';
+                link.style.backgroundColor = '#0073bb';
+                link.style.color = '#fff';
+                link.style.textDecoration = 'none';
+                link.style.borderRadius = '5px';
+
+                card.appendChild(img);
+                card.appendChild(title);
+                card.appendChild(link);
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
         }
     </script>
 </body>
